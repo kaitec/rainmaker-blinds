@@ -1,4 +1,4 @@
-## Build and Flash firmware
+## Smart Blinds for Reinmaker
 
 Follow the ESP RainMaker Documentation [Get Started]
 (https://rainmaker.espressif.com/docs/get-started.html)
