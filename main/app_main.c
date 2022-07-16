@@ -79,7 +79,7 @@ void app_main()
     esp_rmaker_config_t rainmaker_cfg = {
         .enable_time_sync = false,
     };
-    esp_rmaker_node_t *node = esp_rmaker_node_init(&rainmaker_cfg, "ESP RainMaker Device", "Blinds");
+    esp_rmaker_node_t *node = esp_rmaker_node_init(&rainmaker_cfg, "Smart Blins Device", "Two channel");
     if (!node) {
         ESP_LOGE(TAG, "Could not initialise node. Aborting!!!");
         vTaskDelay(5000/portTICK_PERIOD_MS);
@@ -91,18 +91,18 @@ void app_main()
     esp_rmaker_device_add_param(device, esp_rmaker_param_create("name", NULL, esp_rmaker_str("Blind Name"), PROP_FLAG_READ | PROP_FLAG_WRITE));
     esp_rmaker_device_add_cb(device, write_cb, NULL);
     /********** Blinds param height ***********/
-    esp_rmaker_param_t *height_param = esp_rmaker_param_create("height", "esp.param.blinds-position", esp_rmaker_int(0), PROP_FLAG_READ | PROP_FLAG_WRITE);
+    esp_rmaker_param_t *height_param = esp_rmaker_param_create("height", "esp.param.range", esp_rmaker_int(0), PROP_FLAG_READ | PROP_FLAG_WRITE);
     esp_rmaker_param_add_ui_type(height_param, "esp.ui.slider");
     esp_rmaker_param_add_bounds(height_param, esp_rmaker_int(0), esp_rmaker_int(100), esp_rmaker_int(1));
     esp_rmaker_device_add_param(device, height_param);
     /********** Blinds param angle ***********/
-    esp_rmaker_param_t *angle_param = esp_rmaker_param_create("angle", "esp.param.blinds-position", esp_rmaker_int(0), PROP_FLAG_READ | PROP_FLAG_WRITE);
+    esp_rmaker_param_t *angle_param = esp_rmaker_param_create("angle", "esp.param.range", esp_rmaker_int(0), PROP_FLAG_READ | PROP_FLAG_WRITE);
     esp_rmaker_param_add_ui_type(angle_param, "esp.ui.slider");
     esp_rmaker_param_add_bounds(angle_param, esp_rmaker_int(0), esp_rmaker_int(12), esp_rmaker_int(1));
     esp_rmaker_device_add_param(device, angle_param);
     /* Generic Mode Parameter */
-     esp_rmaker_param_t *mode = esp_rmaker_param_create("Mode", "esp.param.mode", esp_rmaker_str("Auto"), PROP_FLAG_READ | PROP_FLAG_WRITE);
-     static const char *valid_strs[] = {"Auto", "Open", "Close"};
+     esp_rmaker_param_t *mode = esp_rmaker_param_create("Settings", "esp.param.mode", esp_rmaker_str("None"), PROP_FLAG_READ | PROP_FLAG_WRITE);
+     static const char *valid_strs[] = {"None", "Remote connect", "Motor calibration"};
      esp_rmaker_param_add_valid_str_list(mode, valid_strs, 3);
      esp_rmaker_param_add_ui_type(mode, "esp.ui.dropdown");
      esp_rmaker_device_add_param(device, mode);
