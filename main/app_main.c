@@ -28,6 +28,8 @@
 
 static const char *TAG = "app_main";
 
+esp_rmaker_device_t *rmaker_device;
+
 uint8_t height, angle;
 
 /* Callback to handle commands received from the RainMaker cloud */
@@ -37,15 +39,20 @@ static esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_pa
     if (ctx) {
         ESP_LOGI(TAG, "Received write request via : %s", esp_rmaker_device_cb_src_to_str(ctx->src));
     }
-    char *device_name = esp_rmaker_device_get_name(device);
+    //char *device_name = esp_rmaker_device_get_name(device);
     char *param_name = esp_rmaker_param_get_name(param);
-    if (strcmp(param_name, "height") == 0) {
+    if (strcmp(param_name, "height") == 0) 
+    {
         ESP_LOGI(TAG, "Received height = %d", val.val.i);
         height=val.val.i;
-    } else if (strcmp(param_name, "angle") == 0) {
+    } 
+    else if (strcmp(param_name, "angle") == 0) 
+    {
         ESP_LOGI(TAG, "Received angle = %d", val.val.i);
         angle=val.val.i;
-    } else {
+    } 
+    else 
+    {
         /* Silently ignoring invalid params */
         return ESP_OK;
     }
@@ -87,27 +94,26 @@ void app_main()
     }
 
     /********** Blinds devices ****************/
-    esp_rmaker_device_t *device = esp_rmaker_device_create("Blinds", "esp.device.blinds-external", NULL);
-    esp_rmaker_device_add_param(device, esp_rmaker_param_create("name", NULL, esp_rmaker_str("Blind Name"), PROP_FLAG_READ | PROP_FLAG_WRITE));
-    esp_rmaker_device_add_cb(device, write_cb, NULL);
+    rmaker_device = esp_rmaker_device_create("Blinds", "esp.device.blinds-external", NULL);
+    esp_rmaker_device_add_cb(rmaker_device, write_cb, NULL);
     /********** Blinds param height ***********/
     esp_rmaker_param_t *height_param = esp_rmaker_param_create("height", "esp.param.range", esp_rmaker_int(0), PROP_FLAG_READ | PROP_FLAG_WRITE);
     esp_rmaker_param_add_ui_type(height_param, "esp.ui.slider");
     esp_rmaker_param_add_bounds(height_param, esp_rmaker_int(0), esp_rmaker_int(100), esp_rmaker_int(1));
-    esp_rmaker_device_add_param(device, height_param);
+    esp_rmaker_device_add_param(rmaker_device, height_param);
     /********** Blinds param angle ***********/
     esp_rmaker_param_t *angle_param = esp_rmaker_param_create("angle", "esp.param.range", esp_rmaker_int(0), PROP_FLAG_READ | PROP_FLAG_WRITE);
     esp_rmaker_param_add_ui_type(angle_param, "esp.ui.slider");
     esp_rmaker_param_add_bounds(angle_param, esp_rmaker_int(0), esp_rmaker_int(12), esp_rmaker_int(1));
-    esp_rmaker_device_add_param(device, angle_param);
+    esp_rmaker_device_add_param(rmaker_device, angle_param);
     /* Generic Mode Parameter */
-     esp_rmaker_param_t *mode = esp_rmaker_param_create("Settings", "esp.param.mode", esp_rmaker_str("None"), PROP_FLAG_READ | PROP_FLAG_WRITE);
-     static const char *valid_strs[] = {"None", "Remote connect", "Motor calibration"};
-     esp_rmaker_param_add_valid_str_list(mode, valid_strs, 3);
-     esp_rmaker_param_add_ui_type(mode, "esp.ui.dropdown");
-     esp_rmaker_device_add_param(device, mode);
+     // esp_rmaker_param_t *mode = esp_rmaker_param_create("Mode", "esp.param.mode", esp_rmaker_str("None"), PROP_FLAG_READ | PROP_FLAG_WRITE);
+     // static const char *valid_strs[] = {"None", "Remote connect", "Motor calibration"};
+     // esp_rmaker_param_add_valid_str_list(mode, valid_strs, 3);
+     // esp_rmaker_param_add_ui_type(mode, "esp.ui.dropdown");
+     // esp_rmaker_device_add_param(device, mode);
     /********** Add device to Node ***********/
-    esp_rmaker_node_add_device(node, device);
+    esp_rmaker_node_add_device(node, rmaker_device);
     /************** END **********************/
 
     /* Enable OTA */
