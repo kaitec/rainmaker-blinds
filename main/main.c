@@ -5,22 +5,16 @@
 #include <app_wifi.h>
 #include "rainmaker.h"
 #include "hardware.h"
+#include "flash.h"
 
 void app_main()
 {
     hardware_init();
-
-    /* Initialize NVS. */
-    esp_err_t err = nvs_flash_init();
-    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        err = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK( err );
-
+    flash_init();
     app_wifi_init();
     rainmaker_init();
 
+    esp_err_t err;
     err = app_wifi_start(POP_TYPE_RANDOM);
     if (err != ESP_OK) { // Could not start Wifi. Aborting!!!
         vTaskDelay(5000/portTICK_PERIOD_MS);

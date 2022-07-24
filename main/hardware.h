@@ -25,6 +25,7 @@
 #define DEBUG  NONE
 #define NONE   0
 #define RMAKER 1
+#define MOTOR  2
 
 #define ESP_INTR_FLAG_DEFAULT           0
 #define WIFI_RESET_BUTTON_TIMEOUT       3
