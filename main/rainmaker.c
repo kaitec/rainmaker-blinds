@@ -15,7 +15,7 @@
 #include "esp_diagnostics_system_metrics.h"
 #include "esp_rmaker_utils.h"
 #include "hardware.h"
-#include "main.h"
+#include "rainmaker.h"
 
 esp_rmaker_device_t *rmaker_device;
 uint8_t height, angle;
@@ -90,4 +90,16 @@ void rainmaker_device_init(void)
     /********** Add device to Node ***********/
     esp_rmaker_node_add_device(node, rmaker_device);
     /************** END **********************/
+}
+
+void rainmaker_init(void)
+{
+	rainmaker_node_init();
+    rainmaker_device_init();
+    esp_rmaker_ota_enable_default();
+    esp_rmaker_timezone_service_enable();
+    esp_rmaker_schedule_enable();
+    esp_rmaker_scenes_enable();
+    app_insights_enable();
+    esp_rmaker_start();
 }

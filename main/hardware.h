@@ -12,6 +12,10 @@
 #define GPIO_INPUT_PIN_SEL  ((1ULL<<RESET_BUTTON))
 #endif
 
+#define DEBUG  NONE
+#define NONE   0
+#define RMAKER 1
+
 #define ESP_INTR_FLAG_DEFAULT           0
 #define WIFI_RESET_BUTTON_TIMEOUT       3
 #define FACTORY_RESET_BUTTON_TIMEOUT    10
