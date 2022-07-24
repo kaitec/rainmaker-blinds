@@ -14,9 +14,11 @@
 #include <app_insights.h>
 #include "esp_diagnostics_system_metrics.h"
 #include "esp_rmaker_utils.h"
+#include "hardware.h"
 #include "main.h"
 
 esp_rmaker_device_t *rmaker_device;
+uint8_t height, angle;
 
 /* Callback to handle commands received from the RainMaker cloud */
 esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_param_t *param,
@@ -30,20 +32,20 @@ esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_param_t *
     if (strcmp(param_name, "height") == 0) 
     {
         if(DEBUG==RMAKER) ESP_LOGI(__func__, "Received height = %d", val.val.i);
-        //height=val.val.i;
+        height=val.val.i;
     } 
     else if (strcmp(param_name, "angle") == 0) 
     {
         if(DEBUG==RMAKER) ESP_LOGI(__func__, "Received angle = %d", val.val.i);
-        //angle=val.val.i;
+        angle=val.val.i;
     } 
     else 
     {
         /* Silently ignoring invalid params */
         return ESP_OK;
     }
-    //app_fan_set_speed(height, angle);
-    //esp_rmaker_param_update_and_report(param, val);
+    app_fan_set_speed(height, angle);
+    esp_rmaker_param_update_and_report(param, val);
     return ESP_OK;
 }
 

@@ -20,7 +20,7 @@
 
 void app_main()
 {
-    app_driver_init();
+    hardware_init();
 
     /* Initialize NVS. */
     esp_err_t err = nvs_flash_init();
