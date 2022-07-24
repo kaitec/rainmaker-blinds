@@ -16,13 +16,13 @@
 
 #include <app_reset.h>
 #include <ws2812_led.h>
-#include "app_priv.h"
+#include "hardware.h"
 
 /* This is the button that is used for toggling the power */
-#define BUTTON_GPIO          CONFIG_EXAMPLE_BOARD_BUTTON_GPIO
-#define BUTTON_ACTIVE_LEVEL  0
+#define RESET_BUTTON        0
+#define RESET_ACTIVE_LEVEL  0
 
-#define OUTPUT_GPIO          2
+#define OUTPUT_GPIO         2
 
 #define WIFI_RESET_BUTTON_TIMEOUT       3
 #define FACTORY_RESET_BUTTON_TIMEOUT    10
@@ -48,7 +48,7 @@ esp_err_t app_fan_set_speed(uint8_t height, uint8_t angle)
 void app_driver_init()
 {
     ws2812_led_init();
-    app_reset_button_register(app_reset_button_create(BUTTON_GPIO, BUTTON_ACTIVE_LEVEL),
+    app_reset_button_register(app_reset_button_create(RESET_BUTTON, RESET_ACTIVE_LEVEL),
                                WIFI_RESET_BUTTON_TIMEOUT, FACTORY_RESET_BUTTON_TIMEOUT);
 
     /* Configure GPIO */

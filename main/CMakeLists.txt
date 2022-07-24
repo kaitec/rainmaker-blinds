@@ -1,3 +1,3 @@
-idf_component_register(SRCS ./app_driver.c ./main.c ./rainmaker.c
+idf_component_register(SRCS ./main.c ./rainmaker.c ./hardware.c
                        INCLUDE_DIRS ".")
 

@@ -16,7 +16,7 @@
 #include "esp_rmaker_utils.h"
 #include "rainmaker.h"
 #include "main.h"
-#include "app_priv.h"
+#include "hardware.h"
 
 void app_main()
 {
