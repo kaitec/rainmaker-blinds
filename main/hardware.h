@@ -1,3 +1,6 @@
+#ifndef HARDWARE_H_
+#define HARDWARE_H_
+
 #pragma once
 #include <stdint.h>
 #include <stdbool.h>
@@ -14,9 +17,9 @@
 #define LED_R               17
 #define LED_G               16
 #define LED_B               15
-#define MOTOR_FB            14
 #define UP_DIR              13
 #define DOWN_DIR            12
+#define MOTOR_FB            14
 #define BUTTON               0
 #define GPIO_OUTPUT_PIN_SEL ((1ULL<<LED_R) | (1ULL<<LED_G) | (1ULL<<LED_B) | (1ULL<<UP_DIR) | (1ULL<<DOWN_DIR))
 #define GPIO_INPUT_PIN_SEL  ((1ULL<<MOTOR_FB) | (1ULL<<BUTTON))
@@ -37,3 +40,5 @@ void timer_init(void);
 void hardware_init(void);
 esp_err_t app_fan_set_power(bool power);
 esp_err_t app_fan_set_speed(uint8_t height, uint8_t angle);
+
+#endif /* HARDWARE_H_ */

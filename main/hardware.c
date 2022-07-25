@@ -9,6 +9,7 @@
 #include <app_reset.h>
 #include <ws2812_led.h>
 #include "hardware.h"
+#include "motor.h"
 
 esp_timer_handle_t fast_timer; //   1 ms
 esp_timer_handle_t slow_timer; // 100 ms
