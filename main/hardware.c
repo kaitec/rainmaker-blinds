@@ -11,23 +11,22 @@
 #include "hardware.h"
 #include "motor.h"
 
-esp_timer_handle_t fast_timer; //   1 ms
-esp_timer_handle_t slow_timer; // 100 ms
+esp_timer_handle_t fast_timer; //  1 ms
+esp_timer_handle_t slow_timer; // 10 ms
 
 void IRAM_ATTR gpio_isr_handler(void* arg)
 {
-    //uint32_t gpio_num = (uint32_t) arg;
-    //if(gpio_num==MOTOR_FB) motor_hall_feedback();
+    motor_feedback = gpio_get_level(MOTOR_FB);
+}
+
+void slow_timer_callback(void *priv) // 10 ms
+{
+   HardmainTask();
 }
 
 void fast_timer_callback(void *priv) // 1 ms
 {
-    //if(motor.feedback==MOTOR_NO_FEEDBACK)   motor_no_fb_timer_function();
-}
-
-void slow_timer_callback(void *priv) // 100 ms
-{
-
+    timer_function();
 }
 
 void timer_init(void)
@@ -44,8 +43,8 @@ void timer_init(void)
         .name = "fast"};
     esp_timer_create(&fast_timer_config, &fast_timer);
 
-    esp_timer_start_periodic(slow_timer, 100000U); 
-    esp_timer_start_periodic(fast_timer,   1000U); 
+    esp_timer_start_periodic(slow_timer, 10000U); 
+    esp_timer_start_periodic(fast_timer,  1000U); 
 }
 
 void gpio_init(void)

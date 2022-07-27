@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define PCB_REV   D4//1
+#define PCB_REV   D8//1
 
 #if(PCB_REV==1)
 #define RESET_BUTTON        0
@@ -16,16 +16,24 @@
 #elif(PCB_REV==D4)
 #define LED_R               17
 #define LED_G               16
-#define LED_B               15
 #define UP_DIR              13
 #define DOWN_DIR            12
 #define MOTOR_FB            14
 #define BUTTON               0
-#define GPIO_OUTPUT_PIN_SEL ((1ULL<<LED_R) | (1ULL<<LED_G) | (1ULL<<LED_B) | (1ULL<<UP_DIR) | (1ULL<<DOWN_DIR))
+#define GPIO_OUTPUT_PIN_SEL ((1ULL<<LED_R) | (1ULL<<LED_G) | (1ULL<<UP_DIR) | (1ULL<<DOWN_DIR))
+#define GPIO_INPUT_PIN_SEL  ((1ULL<<MOTOR_FB) | (1ULL<<BUTTON))
+#elif(PCB_REV==D8)
+#define LED_R               32
+#define LED_G               33
+#define MOTOR_FB            34
+#define UP_DIR               2
+#define DOWN_DIR             4
+#define BUTTON              35
+#define GPIO_OUTPUT_PIN_SEL ((1ULL<<LED_R) | (1ULL<<LED_G) | (1ULL<<UP_DIR) | (1ULL<<DOWN_DIR))
 #define GPIO_INPUT_PIN_SEL  ((1ULL<<MOTOR_FB) | (1ULL<<BUTTON))
 #endif
 
-#define DEBUG  NONE
+#define DEBUG  MOTOR//NONE
 #define NONE   0
 #define RMAKER 1
 #define MOTOR  2

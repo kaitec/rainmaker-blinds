@@ -18,11 +18,19 @@ bool control_point = 0; // TODO ?
 bool reset_point = 0;   // TODO ?
 
 bool alert_position = 0;
-bool motor_feedback = !FB_IN_MOTION;
+//bool motor_feedback = !FB_IN_MOTION;
 
 C_STATUS_CODE_t CS_RESP = c_s_success;
 
-uint16_t feedback_timer_counter = 0;
+uint16_t feedback_timer_counter=0;
+bool motor_feedback = !FB_IN_MOTION;
+
+void set_blind(uint8_t len, uint8_t val)
+{
+		reciv.cmd=S_IO_CONTROL;
+		reciv.cmd_len=len;
+		reciv.cmd_val=val;
+}
 
 motor_movement_t motor_driver_state(motor_movement_t state) {
 	static motor_movement_t direction = M_STOPED;
@@ -120,6 +128,59 @@ void save_position_per_int(void)
 	}
 }
 
+void timer_function(void)
+{
+     if(feedback_timer_counter < PSEVDO_HALL) 
+     {
+       if(motor_feedback == FB_IN_MOTION) feedback_timer_counter++;
+     }
+     else
+     {
+       feedback_timer_counter=0;
+       motor_HallFb_function();
+     }
+    /******************************************************************/
+    if (blind_time.b_p.search_inetrval) blind_time.b_p.search_inetrval--;
+
+    if (blind_time.b_p.obtain_ping) blind_time.b_p.obtain_ping--;
+
+    if  (blind_time.b_h.move) blind_time.b_h.move--;
+    if  (blind_time.b_h.prot) blind_time.b_h.prot--;
+
+    if  (blind_time.b_h.rest && !hall_ticks)
+    {
+      blind_time.b_h.rest--;
+      if  (!(blind_time.b_h.rest%15)) blind_time.b_h.work++;
+    }
+    if  ((blind_time.b_h.work) && hall_ticks)
+    {
+      blind_time.b_h.work--;
+      blind_time.b_h.rest+=15;
+    }
+}
+
+void motor_HallFb_function(void)
+{
+	blind_time.b_h.move = STEP_TIME_OUT;
+	esp_logi_ticks++;
+	if (user_motor_var.set_step != user_motor_var.current_step) {
+		hall_ticks++;
+		if (motor_driver_state(M_DIR_GET) == M_DIR_UP) {
+			user_motor_var.current_step++;
+			if (user_motor_var.set_t_step < user_motor_var.max_t_step)
+				user_motor_var.set_t_step++;
+		} else if (motor_driver_state(M_DIR_GET) == M_DIR_DOWN) {
+			user_motor_var.current_step--;
+			if (user_motor_var.set_t_step)
+				user_motor_var.set_t_step--;
+		}
+	}
+	if ((user_motor_var.set_step == user_motor_var.current_step)
+			&& ((user_motor_var.set_step != 0)
+					&& (user_motor_var.set_step != user_motor_var.max_r_step)))
+		motor_driver_state(M_STOPED);
+}
+
 motor_movement_t angle_direction(uint32_t tilt)
 {
 	motor_movement_t rez = M_SUCCESS;
@@ -214,7 +275,7 @@ void HardmainTask(void) {
 	check_alarm();
 	switch (State) {
 		case no_hall_sens:
-		//ESP_LOGI(__func__, "Init No hall sens");
+		if(DEBUG==MOTOR) ESP_LOGI(__func__, "Init No hall sens");
 		  {
 			static bool add_msg = 0;
 			if (!add_msg)
@@ -230,7 +291,7 @@ void HardmainTask(void) {
 			break;
 
 		case init:
-			//ESP_LOGI(__func__, "Init direction - DOWN");
+			if(DEBUG==MOTOR) ESP_LOGI(__func__, "Init direction - DOWN");
 
 			if (motor_driver_state(M_DIR_GET) != M_STOPED)
 				motor_driver_state(M_STOPED);
@@ -241,7 +302,7 @@ void HardmainTask(void) {
 			break;
 
 		case down_init:
-		    //ESP_LOGI(__func__, "Init DOWN point");
+		  if(DEBUG==MOTOR) ESP_LOGI(__func__, "Init DOWN point");
 			if (blind_time.b_h.prot){
 				break;}
 			motor_driver_state(M_DIR_DOWN);
@@ -251,7 +312,7 @@ void HardmainTask(void) {
 			break;
 
 		case up_init:
-		    //ESP_LOGI(__func__, "Init UP point");
+		  if(DEBUG==MOTOR) ESP_LOGI(__func__, "Init UP point");
 			if (blind_time.b_h.prot){
 				break;}
 			motor_driver_state(M_DIR_UP);
@@ -261,10 +322,10 @@ void HardmainTask(void) {
 			break;
 
 		case time_out_init:
-		    //ESP_LOGI(__func__, "Init Time out");
+		  if(DEBUG==MOTOR) ESP_LOGI(__func__, "Init Time out");
 			if (!blind_time.b_h.move && !hall_ticks) {
 				if (reState == up_init) {
-					//ESP_LOGI(__func__, "Hall tick fail - DOWN");
+					if(DEBUG==MOTOR) ESP_LOGI(__func__, "Hall tick fail - DOWN");
 					motor_driver_state(M_STOPED);
 
 					user_motor_var.set_step = 10000;
@@ -273,7 +334,7 @@ void HardmainTask(void) {
 					reState = time_out_init;
 					break;
 				} else {
-					//ESP_LOGI(__func__, "Hall sensor no found");
+					if(DEBUG==MOTOR) ESP_LOGI(__func__, "Hall sensor no found");
 					motor_driver_state(M_STOPED);
 					State = no_hall_sens;
 					break;
@@ -298,7 +359,6 @@ void HardmainTask(void) {
 
 					user_motor_var.max_r_step = hall_ticks;
 					motor_driver_state(M_STOPED);
-					//ESP_LOGI(__func__, "Max = %d", user_motor_var.max_r_step);
 					user_motor_var.set_step = user_motor_var.current_step =
 							user_motor_var.max_r_step;
 					State = reState;
@@ -314,7 +374,6 @@ void HardmainTask(void) {
 			break;
 
 		case saving_parameters:
-		    //ESP_LOGI(__func__, "Init Save parameters");
 			if (user_motor_var.max_r_step) {
 				// TODO add save parameter
 				// sg_conf_lock_open_readwrite();
@@ -326,7 +385,7 @@ void HardmainTask(void) {
 			break;
 
 		case wait_movement:
-		    //ESP_LOGI(__func__, "Init Wait movement");
+		  if(DEBUG==MOTOR) ESP_LOGI(__func__, "Init Wait movement");
 			if (!user_motor_var.max_r_step) {
 				State = init;
 				break;
@@ -345,7 +404,6 @@ void HardmainTask(void) {
 				break;
 
 			if (reciv.cmd == S_IO_CONTROL) {
-				//ESP_LOGI(__func__, "Scene = %d",user_state);
 				State = research_movement;
 				reState = wait_movement;
 				reciv.cmd = JSON_EMPTY_CMD;
@@ -354,7 +412,7 @@ void HardmainTask(void) {
 			break;
 
 		case research_movement:
-		    //ESP_LOGI(__func__, "Init Reserch movement");
+		  if(DEBUG==MOTOR) ESP_LOGI(__func__, "Init Reserch movement");
 			State = wait_movement;
 			bool tilt = 0;
 			motor_movement_t direct;
@@ -371,9 +429,6 @@ void HardmainTask(void) {
 			}
 
 			if ((reciv.cmd_len == 2)&& tilt){ //tilt only
-
-				// ESP_LOGI(__func__, "Resived tilt(only) = %d",
-				// 		reciv.cmd_val);
 				direct = angle_direction(reciv.cmd_val);
 				if (direct == M_DIR_UP)
 				{
@@ -386,14 +441,12 @@ void HardmainTask(void) {
 					reState = time_out;
 				}
 				move_k = 3;
-				//ESP_LOGI(__func__, "Set tilt = %d, state %d", user_motor_var.angle_t,motor_driver_state(M_DIR_GET));
 			} else if ((reciv.cmd_len == 3)
 					&& (user_motor_var.current_step
 							<= (user_motor_var.max_r_step
 									- (user_motor_var.max_t_step * 2)))) //tilt + roll
 					{
 				uint16_t angle = (reciv.cmd_val >> 8);
-				//ESP_LOGI(__func__, "Resived tilt(roll) = %d", angle);
 				user_motor_var.angle_t = angle / DIV_ANGLE;
 			}
 
@@ -414,9 +467,6 @@ void HardmainTask(void) {
 				user_motor_var.condition = false;
 				user_motor_var.set_step = user_motor_var.set_step
 						* user_motor_var.max_r_step / 100;
-				// ESP_LOGI(__func__, "SET: Percent = %d,Step = %d",
-				// 		user_motor_var.perc_roll, user_motor_var.set_step);
-
 			}
 
 			reciv.cmd_val = 0;
@@ -449,20 +499,17 @@ void HardmainTask(void) {
 			break;
 
 		case stop:
-		    //ESP_LOGI(__func__, "Stop");
+		  if(DEBUG==MOTOR) ESP_LOGI(__func__, "Stop");
 			save_position_per_int();
 
 			if (!blind_time.b_h.move) {
-				//ESP_LOGI(__func__, "mode tiomeout in waiting stop state");
 				motor_driver_state(M_STOPED);
 				if (user_motor_var.set_step == 0) //down end point
 						{
 					set_down_end_point();
-					//ESP_LOGI(__func__, "set_down_end_point");
 				} else if (user_motor_var.set_step == user_motor_var.max_r_step) //up end point
 						{
 					set_up_end_point();
-					//ESP_LOGI(__func__, "set_up_end_point");
 				}
 			}
 
@@ -489,12 +536,11 @@ void HardmainTask(void) {
 			{
 				sg_conf_save_position();
 				position_point = 1;
-				//ESP_LOGI(__func__, "Position saved");
 			}
 			break;
 
 		case time_out:
-		    //ESP_LOGI(__func__, "Time out");
+		  if(DEBUG==MOTOR) ESP_LOGI(__func__, "Time out");
 			if (motor_driver_state(M_DIR_GET) == M_STOPED){
 				CS_RESP = c_s_success;
 				control_point = 1;
@@ -510,7 +556,6 @@ void HardmainTask(void) {
 				user_motor_var.set_step = user_motor_var.current_step;
 				user_motor_var.angle_t = user_motor_var.set_t_step;
 				State = wait_movement;
-				//ESP_LOGI(__func__, "Timout");
 				CS_RESP = c_s_halt;
 				control_point = 1;
 				if (!alert_position)
