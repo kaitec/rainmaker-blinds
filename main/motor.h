@@ -13,6 +13,10 @@
 #define MAX_REST_TIMEP 3600000
 #define Q_REST_TIMEP 150000
 
+#define S_IO_CONTROL   1
+#define JSON_EMPTY_CMD 0
+#define FB_IN_MOTION   0 // Motor feedback GPIO level motor in motion
+
 #define ROLL 1
 #define TILT 2
 
@@ -38,6 +42,33 @@ typedef struct {
 	uint8_t user_state;
 	bool condition;
 } motor_t;
+
+typedef struct{
+	uint16_t prot;
+	uint16_t move;
+	uint32_t rest;
+	uint32_t work;
+	uint32_t tilt;
+}user_motor_time_t;
+
+typedef struct{
+	int max_eff;
+	int obtain_ping;
+	uint32_t search_inetrval;
+}user_state_time_t;
+
+typedef struct{
+	user_motor_time_t b_h;
+	user_state_time_t b_p;
+}user_time_t;
+
+user_time_t blind_time;
+
+typedef struct {
+  uint8_t cmd_val;
+  uint8_t cmd_len;
+  uint8_t cmd;
+} recivcmd_t; 
 
 typedef enum {
 	c_s_success = 0,
