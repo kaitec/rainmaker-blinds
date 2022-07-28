@@ -6,11 +6,13 @@
 #include "rainmaker.h"
 #include "hardware.h"
 #include "flash.h"
+#include "motor.h"
 
 void app_main()
 {
     hardware_init();
     flash_init();
+    motor_init();
     app_wifi_init();
     rainmaker_init();
 

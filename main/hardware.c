@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <esp_system.h>
 #include <driver/gpio.h>
 #include <app_reset.h>
 #include <ws2812_led.h>
@@ -72,10 +73,22 @@ void gpio_init(void)
     gpio_isr_handler_add(MOTOR_FB, gpio_isr_handler, (void*) MOTOR_FB);
 }
 
+void led_blink(void)
+{
+    for(int i=0; i<3; i++)
+    {
+        gpio_set_level(LED_G, 0); 
+        vTaskDelay(100/portTICK_PERIOD_MS);
+        gpio_set_level(LED_G, 1);
+        vTaskDelay(200/portTICK_PERIOD_MS);
+    }
+}
+
 void hardware_init()
 {
     gpio_init();
     timer_init();
+    led_blink();
 
     // ws2812_led_init();
     // app_reset_button_register(app_reset_button_create(RESET_BUTTON, RESET_ACTIVE_LEVEL),

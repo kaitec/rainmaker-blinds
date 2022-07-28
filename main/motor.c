@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <driver/gpio.h>
 #include <esp_log.h>
+#include <esp_system.h>
 #include "hardware.h"
 #include "flash.h"
 #include "motor.h"
@@ -43,15 +44,17 @@ motor_movement_t motor_driver_state(motor_movement_t state) {
 		return M_DIR_DOWN_ERR;
 	//if found set parameter
 	if (state == M_DIR_UP) {
-		if (ON_LEVEL)
+		if (ON_LEVEL){
 			gpio_set_level(UP_DIR, 1);
+		}
 		else
 			gpio_set_level(UP_DIR, 0);
 		direction = M_DIR_UP;
 	}
 	if (state == M_DIR_DOWN) { 
-		if (ON_LEVEL)
+		if (ON_LEVEL){
 			gpio_set_level(DOWN_DIR, 1);
+		}
 		else
 			gpio_set_level(DOWN_DIR, 0);
 		direction = M_DIR_DOWN;
@@ -67,11 +70,11 @@ motor_movement_t motor_driver_state(motor_movement_t state) {
 		blind_time.b_h.prot = DEAD_TIME;
 
 		hall_ticks = 0;
-		if (user_motor_var.max_r_step)
+		if (user_motor_var.max_r_step){
 			user_motor_var.perc_roll = user_motor_var.current_step * 100 / user_motor_var.max_r_step;
+		}
 		direction = M_STOPED;
 	}
-
 	return direction;
 }
 
@@ -188,14 +191,14 @@ motor_movement_t angle_direction(uint32_t tilt)
 
 	if (motor_driver_state(M_DIR_GET) == M_STOPED) {
 		if (angle > user_motor_var.set_t_step) {
-			ESP_LOGI(__func__, "Titl direction - UP");
+			//ESP_LOGI(__func__, "Titl direction - UP");
 			if (motor_driver_state(M_DIR_GET) != M_DIR_UP)
 				motor_driver_state(M_STOPED);
 			rez = M_DIR_UP;
 			user_motor_var.set_step += (angle
 					- user_motor_var.set_t_step);
 		} else if (angle < user_motor_var.set_t_step) {
-			ESP_LOGI(__func__, "Titl direction - DOWN");
+			//ESP_LOGI(__func__, "Titl direction - DOWN");
 			if (motor_driver_state(M_DIR_GET) != M_DIR_DOWN)
 				motor_driver_state(M_STOPED);
 			rez = M_DIR_DOWN;
@@ -203,8 +206,7 @@ motor_movement_t angle_direction(uint32_t tilt)
 					- angle);
 		}
 		user_motor_var.angle_t = angle;
-		ESP_LOGI(__func__, "Current tilt = %d",
-				user_motor_var.set_t_step);
+		//ESP_LOGI(__func__, "Current tilt = %d",	user_motor_var.set_t_step);
 	}
 	return rez;
 }
@@ -213,9 +215,8 @@ motor_movement_t roll_direction()
 {
 	motor_movement_t rez = M_SUCCESS;
 	if (reciv.cmd_val == 101){
-		ESP_LOGI(__func__, "#Special cmd : Curent: Percent = %d,Step = %d",
-						user_motor_var.perc_roll, user_motor_var.set_step);
-			ESP_LOGI(__func__, "Direction - UP");
+		//ESP_LOGI(__func__, "#Special cmd : Curent: Percent = %d,Step = %d",	user_motor_var.perc_roll, user_motor_var.set_step);
+			//ESP_LOGI(__func__, "Direction - UP");
 			if (motor_driver_state(M_DIR_GET) != M_DIR_UP)
 				motor_driver_state(M_STOPED);
 			rez = M_DIR_UP;
@@ -223,9 +224,8 @@ motor_movement_t roll_direction()
 	}
 	else if (reciv.cmd_val == 102)
 	{
-		ESP_LOGI(__func__, "#Special cmd : CURR: Percent = %d,Step = %d",
-										user_motor_var.perc_roll, user_motor_var.set_step);
-		ESP_LOGI(__func__, "Direction - DOWN");
+		//ESP_LOGI(__func__, "#Special cmd : CURR: Percent = %d,Step = %d",	user_motor_var.perc_roll, user_motor_var.set_step);
+		//ESP_LOGI(__func__, "Direction - DOWN");
 		if (motor_driver_state(M_DIR_GET) != M_DIR_DOWN)
 			motor_driver_state(M_STOPED);
 		rez = M_DIR_DOWN;
@@ -233,16 +233,15 @@ motor_movement_t roll_direction()
 	}
 	else {
 		//reciv.cmd_val &= 0x000000FF;
-		ESP_LOGI(__func__, "Curent: Percent = %d,Step = %d",
-				user_motor_var.perc_roll, user_motor_var.set_step);
+		//ESP_LOGI(__func__, "Curent: Percent = %d,Step = %d",	user_motor_var.perc_roll, user_motor_var.set_step);
 		if (reciv.cmd_val > user_motor_var.perc_roll) {
-			ESP_LOGI(__func__, "Direction - UP");
+			//ESP_LOGI(__func__, "Direction - UP");
 			if (motor_driver_state(M_DIR_GET) != M_DIR_UP)
 				motor_driver_state(M_STOPED);
 			rez = M_DIR_UP;
 			user_motor_var.set_step = reciv.cmd_val;
 		} else if (reciv.cmd_val < user_motor_var.perc_roll) {
-			ESP_LOGI(__func__, "Direction - DOWN");
+			//ESP_LOGI(__func__, "Direction - DOWN");
 			if (motor_driver_state(M_DIR_GET) != M_DIR_DOWN)
 				motor_driver_state(M_STOPED);
 			rez = M_DIR_DOWN;
@@ -256,23 +255,30 @@ return rez;
 void HardmainTask(void) {
 	static enum uint8_t {
 		wait_movement = 0,
-		research_movement,
-		down,
-		up,
-		time_out,
-		stop,
-		//motor calibration cases
-		init,
-		down_init,
-		time_out_init,
-		up_init,
-		saving_parameters,
-		//do nothing without hall sensor signals
-		no_hall_sens
+		research_movement, /*1*/
+		down,              /*2*/
+		up,                /*3*/
+		time_out,          /*4*/
+		stop,              /*5*/
+		init,              /*6*/
+		down_init,         /*7*/
+		time_out_init,     /*8*/
+		up_init,           /*9*/
+		saving_parameters, /*10*/
+		no_hall_sens       /*11*/
 	} State = wait_movement;
 	static uint8_t reState = stop;
 	static uint8_t move_k = 0;
+	//static uint16_t cnt=0;
 	check_alarm();
+
+		 /******* For debug **********/ 
+     // cnt++;
+     // if(cnt>50){
+     // 	 ESP_LOGI(__func__, "State = %d,	b_h.prot = %d,	b_h.move = %d", State, blind_time.b_h.prot, blind_time.b_h.move);
+     // 	 cnt=0;}
+	   /******** END ***************/
+
 	switch (State) {
 		case no_hall_sens:
 		if(DEBUG==MOTOR) ESP_LOGI(__func__, "Init No hall sens");
@@ -570,4 +576,43 @@ void HardmainTask(void) {
 			State = stop;
 			break;
 	}
+}
+
+void load_position(void)
+{
+  // int32_t val1 = 0;
+  // sg_conf_user_height_cycles_get(&val1);
+  // ESP_LOGI(__func__, "user height: %d", val1);
+  // user_motor_var.max_r_step = val1;
+  // sg_conf_height_cycles_get(&val1);
+  // ESP_LOGI(__func__, "height: %d", val1);
+  // if(user_motor_var.max_r_step)
+  // {
+  //   sg_conf_save_height_cycles_get(&val1);
+  //   user_motor_var.set_step = user_motor_var.current_step = val1&0x0000FFFF;
+  //   user_motor_var.perc_roll = user_motor_var.current_step*100/user_motor_var.max_r_step;
+  //   user_motor_var.angle_t = user_motor_var.set_t_step = val1>>16;
+  //   ESP_LOGI(__func__, "save height: %d", val1);
+  //   ESP_LOGI(__func__, "current height: %d", user_motor_var.current_step);
+  //   ESP_LOGI(__func__, "current angle: %d", user_motor_var.set_t_step);
+  // }
+}
+
+void reset_movement_variables(void)
+{
+	user_motor_var.max_t_step = MAX_DEF_T_STEPS;
+
+	blind_time.b_h.rest = 0;
+	blind_time.b_h.work = MAX_WORK_TIMEP;
+	position_point = 0;
+
+	control_point = 0;
+  reset_point = 0;
+
+	load_position();
+}
+
+void motor_init(void)
+{
+	reset_movement_variables();
 }

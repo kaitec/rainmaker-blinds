@@ -88,6 +88,9 @@ void HardmainTask(void);
 void timer_function(void);
 void set_blind(uint8_t len, uint8_t val);
 void motor_HallFb_function(void);
+void reset_movement_variables(void);
+void load_position(void);
+void motor_init(void);
 
 extern bool motor_feedback;
 extern uint32_t hall_ticks;

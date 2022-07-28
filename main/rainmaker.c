@@ -32,13 +32,11 @@ esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_param_t *
     char *param_name = esp_rmaker_param_get_name(param);
     if (strcmp(param_name, "height") == 0) 
     {
-        if(DEBUG==RMAKER) ESP_LOGI(__func__, "Received height = %d", val.val.i);
         set_blind(ROLL, val.val.i);
     } 
     else if (strcmp(param_name, "angle") == 0) 
     {
-        if(DEBUG==RMAKER) ESP_LOGI(__func__, "Received angle = %d", val.val.i);
-        set_blind(TILT, val.val.i);
+        set_blind(TILT, val.val.i * 15);
     } 
     else 
     {
