@@ -19,7 +19,6 @@
 #include "motor.h"
 
 esp_rmaker_device_t *rmaker_device;
-uint8_t height, angle;
 
 /* Callback to handle commands received from the RainMaker cloud */
 esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_param_t *param,
@@ -40,12 +39,24 @@ esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_param_t *
     } 
     else 
     {
-        /* Silently ignoring invalid params */
         return ESP_OK;
     }
-    //app_fan_set_speed(height, angle);
     esp_rmaker_param_update_and_report(param, val);
     return ESP_OK;
+}
+
+void rmaker_roll_update(uint8_t val)
+{
+    esp_rmaker_param_update_and_report(
+            esp_rmaker_device_get_param_by_name(rmaker_device, "height"),
+            esp_rmaker_int(val));
+}
+
+void rmaker_angle_update(uint8_t val)
+{
+    esp_rmaker_param_update_and_report(
+            esp_rmaker_device_get_param_by_name(rmaker_device, "angle"),
+            esp_rmaker_int(val));   
 }
 
 esp_rmaker_node_t *node;
@@ -71,12 +82,12 @@ void rainmaker_device_init(void)
     rmaker_device = esp_rmaker_device_create("Blinds", "esp.device.blinds-external", NULL);
     esp_rmaker_device_add_cb(rmaker_device, write_cb, NULL);
     /********** Blinds param height ***********/
-    esp_rmaker_param_t *height_param = esp_rmaker_param_create("height", "esp.param.range", esp_rmaker_int(0), PROP_FLAG_READ | PROP_FLAG_WRITE);
+    esp_rmaker_param_t *height_param = esp_rmaker_param_create("height", "esp.param.blinds-position", esp_rmaker_int(0), PROP_FLAG_READ | PROP_FLAG_WRITE);
     esp_rmaker_param_add_ui_type(height_param, "esp.ui.slider");
     esp_rmaker_param_add_bounds(height_param, esp_rmaker_int(0), esp_rmaker_int(100), esp_rmaker_int(1));
     esp_rmaker_device_add_param(rmaker_device, height_param);
     /********** Blinds param angle ***********/
-    esp_rmaker_param_t *angle_param = esp_rmaker_param_create("angle", "esp.param.range", esp_rmaker_int(0), PROP_FLAG_READ | PROP_FLAG_WRITE);
+    esp_rmaker_param_t *angle_param = esp_rmaker_param_create("angle", "esp.param.blinds-position", esp_rmaker_int(0), PROP_FLAG_READ | PROP_FLAG_WRITE);
     esp_rmaker_param_add_ui_type(angle_param, "esp.ui.slider");
     esp_rmaker_param_add_bounds(angle_param, esp_rmaker_int(0), esp_rmaker_int(12), esp_rmaker_int(1));
     esp_rmaker_device_add_param(rmaker_device, angle_param);

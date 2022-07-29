@@ -5,3 +5,6 @@
 void rainmaker_node_init(void);
 void rainmaker_device_init(void);
 void rainmaker_init(void);
+
+void rmaker_roll_update(uint8_t val);
+void rmaker_angle_update(uint8_t val);

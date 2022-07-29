@@ -5,9 +5,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define PCB_REV   8//1
+#define PCB_REV   8
 
-#if(PCB_REV==1)
+#if(PCB_REV==10)
 #define RESET_BUTTON        0
 #define RESET_ACTIVE_LEVEL  0
 #define OUTPUT_GPIO         2
