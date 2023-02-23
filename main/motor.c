@@ -3,6 +3,7 @@
 #include <driver/gpio.h>
 #include <esp_log.h>
 #include <esp_system.h>
+#include "rainmaker.h"
 #include "hardware.h"
 #include "flash.h"
 #include "motor.h"
@@ -11,6 +12,7 @@ motor_t user_motor_var;
 recivcmd_t reciv;
 bool position_point; //set when need send notification to server? payload are current position
 bool Alarm = false; //set when corrupt motor timing recommendations
+bool motor_start = false;
 
 uint32_t hall_ticks = 0; // feedback from hall sensor
 uint32_t esp_logi_ticks = 0; //for debug
@@ -26,11 +28,29 @@ C_STATUS_CODE_t CS_RESP = c_s_success;
 uint16_t feedback_timer_counter=0;
 bool motor_feedback = !FB_IN_MOTION;
 
+uint8_t feedback_position;
+uint8_t feedback_angle;
+
 void set_blind(uint8_t len, uint8_t val)
 {
 		reciv.cmd=S_IO_CONTROL;
 		reciv.cmd_len=len;
 		reciv.cmd_val=val;
+}
+
+uint8_t get_roll(void)
+{
+	return feedback_position;
+}
+
+uint8_t get_angle(void)
+{
+	return feedback_angle;
+}
+
+void set_calibrate(void)
+{
+
 }
 
 motor_movement_t motor_driver_state(motor_movement_t state) {
@@ -74,6 +94,12 @@ motor_movement_t motor_driver_state(motor_movement_t state) {
 			user_motor_var.perc_roll = user_motor_var.current_step * 100 / user_motor_var.max_r_step;
 		}
 		direction = M_STOPED;
+
+		feedback_position = user_motor_var.perc_roll;
+		feedback_angle = user_motor_var.angle_t;
+
+		rmaker_roll_update(feedback_position);
+		rmaker_angle_update(feedback_angle);
 	}
 	return direction;
 }
@@ -111,13 +137,10 @@ void check_alarm(void)
 
 void sg_conf_save_position(void)
 {
-	// int32_t val1 = 0;
-	// val1 = (user_motor_var.angle_t << 16);
-	// val1 |= user_motor_var.current_step;
-
-	// sg_conf_lock_open_readwrite();
-	// sg_conf_save_height_cycles_set(val1);
-	// sg_conf_commit_close_unlock();
+	int32_t value = 0;
+	value = (user_motor_var.angle_t << 16);
+	value |= user_motor_var.current_step;
+	flash_position_write(value);
 }
 
 void save_position_per_int(void)
@@ -252,7 +275,7 @@ motor_movement_t roll_direction()
 return rez;
 }
 
-void HardmainTask(void) {
+void motor_handler(void) {
 	static enum uint8_t {
 		wait_movement = 0,
 		research_movement, /*1*/
@@ -380,12 +403,10 @@ void HardmainTask(void) {
 			break;
 
 		case saving_parameters:
-			if (user_motor_var.max_r_step) {
-				// TODO add save parameter
-				// sg_conf_lock_open_readwrite();
-				// sg_conf_user_height_cycles_set(user_motor_var.max_r_step);
-				// sg_conf_height_cycles_set(user_motor_var.max_r_step);
-				// sg_conf_commit_close_unlock();
+
+			if (user_motor_var.max_r_step)// && !blind_time.b_c.telemetry) 
+			{
+				flash_haight_write(user_motor_var.max_r_step);
 				State = wait_movement;
 			}
 			break;
@@ -580,22 +601,19 @@ void HardmainTask(void) {
 
 void load_position(void)
 {
-  // int32_t val1 = 0;
-  // sg_conf_user_height_cycles_get(&val1);
-  // ESP_LOGI(__func__, "user height: %d", val1);
-  // user_motor_var.max_r_step = val1;
-  // sg_conf_height_cycles_get(&val1);
-  // ESP_LOGI(__func__, "height: %d", val1);
-  // if(user_motor_var.max_r_step)
-  // {
-  //   sg_conf_save_height_cycles_get(&val1);
-  //   user_motor_var.set_step = user_motor_var.current_step = val1&0x0000FFFF;
-  //   user_motor_var.perc_roll = user_motor_var.current_step*100/user_motor_var.max_r_step;
-  //   user_motor_var.angle_t = user_motor_var.set_t_step = val1>>16;
-  //   ESP_LOGI(__func__, "save height: %d", val1);
-  //   ESP_LOGI(__func__, "current height: %d", user_motor_var.current_step);
-  //   ESP_LOGI(__func__, "current angle: %d", user_motor_var.set_t_step);
-  // }
+    user_motor_var.max_r_step = flash_haight_read();
+	ESP_LOGI(__func__, "haight_read: %d", user_motor_var.max_r_step);
+	
+  if(user_motor_var.max_r_step)
+  {
+	int32_t value = flash_position_read();
+    user_motor_var.set_step = user_motor_var.current_step = value&0x0000FFFF;
+    user_motor_var.perc_roll = user_motor_var.current_step*100/user_motor_var.max_r_step;
+    user_motor_var.angle_t = user_motor_var.set_t_step = value>>16;
+    //ESP_LOGI(__func__, "save height: %d", val1);
+    //ESP_LOGI(__func__, "current height: %d", user_motor_var.current_step);
+    //ESP_LOGI(__func__, "current angle: %d", user_motor_var.set_t_step);
+  }
 }
 
 void reset_movement_variables(void)
@@ -607,12 +625,22 @@ void reset_movement_variables(void)
 	position_point = 0;
 
 	control_point = 0;
-  reset_point = 0;
-
-	load_position();
+    reset_point = 0;
 }
 
 void motor_init(void)
 {
 	reset_movement_variables();
+	load_position();
+	motor_start=true;
+}
+
+void motor_reset(void)
+{
+	motor_start=false;
+	reset_movement_variables();
+	flash_haight_write(0);
+    flash_position_write(0);
+	load_position();
+	motor_start=true;	
 }

@@ -22,7 +22,7 @@ void IRAM_ATTR gpio_isr_handler(void* arg)
 
 void slow_timer_callback(void *priv) // 10 ms
 {
-   HardmainTask();
+   if(motor_start) motor_handler();
 }
 
 void fast_timer_callback(void *priv) // 1 ms
@@ -93,23 +93,4 @@ void hardware_init()
     // ws2812_led_init();
     // app_reset_button_register(app_reset_button_create(RESET_BUTTON, RESET_ACTIVE_LEVEL),
     //                            WIFI_RESET_BUTTON_TIMEOUT, FACTORY_RESET_BUTTON_TIMEOUT);
-}
-
-esp_err_t app_fan_set_power(bool power)
-{
-    // if (power) 
-    // {
-    //     gpio_set_level(OUTPUT_GPIO, 1);
-    // } 
-    // else 
-    // {
-    //     gpio_set_level(OUTPUT_GPIO, 0);
-    // }
-    return ESP_OK;
-}
-
-esp_err_t app_fan_set_speed(uint8_t height, uint8_t angle)
-{
-    //return ws2812_led_set_rgb(0, height, angle*8);
-    return ESP_OK;
 }

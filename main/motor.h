@@ -84,14 +84,20 @@ typedef struct {
 	uint32_t res;
 } AVG_MEM_t;
 
-void HardmainTask(void);
+void motor_handler(void);
 void timer_function(void);
-void set_blind(uint8_t len, uint8_t val);
 void motor_HallFb_function(void);
 void reset_movement_variables(void);
 void load_position(void);
 void motor_init(void);
+void motor_reset(void);
 
+void set_blind(uint8_t len, uint8_t val);
+uint8_t get_roll(void);
+uint8_t get_angle(void);
+void set_calibrate(void);
+
+extern bool motor_start;
 extern bool motor_feedback;
 extern uint32_t hall_ticks;
 extern uint32_t esp_logi_ticks;

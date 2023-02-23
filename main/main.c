@@ -3,6 +3,7 @@
 #include <esp_log.h>
 #include <nvs_flash.h>
 #include <app_wifi.h>
+#include "backend_if.h"
 #include "rainmaker.h"
 #include "hardware.h"
 #include "flash.h"

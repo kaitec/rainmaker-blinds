@@ -16,6 +16,7 @@
 #include "esp_rmaker_utils.h"
 #include "hardware.h"
 #include "rainmaker.h"
+#include "flash.h"
 #include "motor.h"
 
 esp_rmaker_device_t *rmaker_device;
@@ -36,6 +37,13 @@ esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_param_t *
     else if (strcmp(param_name, "angle") == 0) 
     {
         set_blind(TILT, val.val.i * 15);
+    } 
+    else if (strcmp(param_name, "Mode") == 0) 
+    {
+        ESP_LOGI(__func__, "Mode: %s", val.val.s);
+
+        if (strcmp(val.val.s, "EnConnect") == 0) led_blink();
+        if (strcmp(val.val.s, "Calibration") == 0) motor_reset();
     } 
     else 
     {
@@ -82,7 +90,7 @@ void rainmaker_device_init(void)
     rmaker_device = esp_rmaker_device_create("Blinds", "esp.device.blinds-external", NULL);
     esp_rmaker_device_add_cb(rmaker_device, write_cb, NULL);
     /********** Blinds param height ***********/
-    esp_rmaker_param_t *height_param = esp_rmaker_param_create("height", "esp.param.blinds-position", esp_rmaker_int(0), PROP_FLAG_READ | PROP_FLAG_WRITE);
+    esp_rmaker_param_t *height_param = esp_rmaker_param_create("height", "esp.param.blinds-position", esp_rmaker_int(100), PROP_FLAG_READ | PROP_FLAG_WRITE);
     esp_rmaker_param_add_ui_type(height_param, "esp.ui.slider");
     esp_rmaker_param_add_bounds(height_param, esp_rmaker_int(0), esp_rmaker_int(100), esp_rmaker_int(1));
     esp_rmaker_device_add_param(rmaker_device, height_param);
@@ -92,11 +100,11 @@ void rainmaker_device_init(void)
     esp_rmaker_param_add_bounds(angle_param, esp_rmaker_int(0), esp_rmaker_int(12), esp_rmaker_int(1));
     esp_rmaker_device_add_param(rmaker_device, angle_param);
     /* Generic Mode Parameter */
-     // esp_rmaker_param_t *mode = esp_rmaker_param_create("Mode", "esp.param.mode", esp_rmaker_str("None"), PROP_FLAG_READ | PROP_FLAG_WRITE);
-     // static const char *valid_strs[] = {"None", "Remote connect", "Motor calibration"};
-     // esp_rmaker_param_add_valid_str_list(mode, valid_strs, 3);
-     // esp_rmaker_param_add_ui_type(mode, "esp.ui.dropdown");
-     // esp_rmaker_device_add_param(device, mode);
+     esp_rmaker_param_t *mode = esp_rmaker_param_create("Mode", "esp.param.mode", esp_rmaker_str("None"), PROP_FLAG_READ | PROP_FLAG_WRITE);
+     static const char *valid_strs[] = {"None", "EnConnect", "Calibration"};
+     esp_rmaker_param_add_valid_str_list(mode, valid_strs, 3);
+     esp_rmaker_param_add_ui_type(mode, "esp.ui.dropdown");
+     esp_rmaker_device_add_param(rmaker_device, mode);
     /********** Add device to Node ***********/
     esp_rmaker_node_add_device(node, rmaker_device);
     /************** END **********************/
