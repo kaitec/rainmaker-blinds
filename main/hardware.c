@@ -10,6 +10,7 @@
 #include <app_reset.h>
 #include <ws2812_led.h>
 #include "hardware.h"
+#include "INA226.h"
 #include "motor.h"
 
 esp_timer_handle_t fast_timer; //  1 ms
@@ -88,6 +89,9 @@ void hardware_init()
 {
     gpio_init();
     timer_init();
+    i2c_init();
+    INA226_init();
+    INA226_calibrate();
     led_blink();
 
     // ws2812_led_init();

@@ -67,6 +67,20 @@ void rmaker_angle_update(uint8_t val)
             esp_rmaker_int(val));   
 }
 
+void rmaker_voltage_update(float val)
+{
+    esp_rmaker_param_update_and_report(
+            esp_rmaker_device_get_param_by_name(rmaker_device, "voltage"),
+            esp_rmaker_float(val));   
+}
+
+void rmaker_current_update(float val)
+{
+    esp_rmaker_param_update_and_report(
+            esp_rmaker_device_get_param_by_name(rmaker_device, "current"),
+            esp_rmaker_float(val));   
+}
+
 esp_rmaker_node_t *node;
 
 void rainmaker_node_init(void)
@@ -99,7 +113,13 @@ void rainmaker_device_init(void)
     esp_rmaker_param_add_ui_type(angle_param, "esp.ui.slider");
     esp_rmaker_param_add_bounds(angle_param, esp_rmaker_int(0), esp_rmaker_int(12), esp_rmaker_int(1));
     esp_rmaker_device_add_param(rmaker_device, angle_param);
-    /* Generic Mode Parameter */
+    /********** Blinds param voltage ***********/
+    esp_rmaker_param_t *voltage_param = esp_rmaker_param_create("voltage", "esp.param.temperature", esp_rmaker_float(0), PROP_FLAG_READ);
+    esp_rmaker_device_add_param(rmaker_device, voltage_param);
+    /********** Blinds param current ***********/
+    esp_rmaker_param_t *current_param = esp_rmaker_param_create("current", "esp.param.temperature", esp_rmaker_float(0), PROP_FLAG_READ);
+    esp_rmaker_device_add_param(rmaker_device, current_param);
+    /********** Blinds param mode ***********/
      esp_rmaker_param_t *mode = esp_rmaker_param_create("Mode", "esp.param.mode", esp_rmaker_str("None"), PROP_FLAG_READ | PROP_FLAG_WRITE);
      static const char *valid_strs[] = {"None", "EnConnect", "Calibration"};
      esp_rmaker_param_add_valid_str_list(mode, valid_strs, 3);

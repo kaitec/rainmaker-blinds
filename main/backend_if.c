@@ -1,5 +1,6 @@
 #include "backend_if.h"
 #include "hardware.h"
+#include "INA226.h"
 #include "flash.h"
 #include "motor.h"
 
