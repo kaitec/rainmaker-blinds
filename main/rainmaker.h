@@ -8,3 +8,5 @@ void rainmaker_init(void);
 
 void rmaker_roll_update(uint8_t val);
 void rmaker_angle_update(uint8_t val);
+void rmaker_voltage_update(float val);
+void rmaker_current_update(float val);

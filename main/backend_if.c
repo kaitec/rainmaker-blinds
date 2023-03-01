@@ -31,3 +31,18 @@ int32_t CalibratePosition()
     motor_reset();
     return 0;
 }
+
+int32_t SetEnocean()
+{
+    return 0;
+}
+
+float GetVoltage()
+{
+    return INA226_get_voltage();
+}
+
+float GetCurrent()
+{
+    return INA226_get_current();
+}

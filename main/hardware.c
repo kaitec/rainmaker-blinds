@@ -9,12 +9,14 @@
 #include <driver/gpio.h>
 #include <app_reset.h>
 #include <ws2812_led.h>
+#include "rainmaker.h"
 #include "hardware.h"
 #include "INA226.h"
 #include "motor.h"
 
 esp_timer_handle_t fast_timer; //  1 ms
 esp_timer_handle_t slow_timer; // 10 ms
+uint16_t tim_count=0;
 
 void IRAM_ATTR gpio_isr_handler(void* arg)
 {
@@ -24,6 +26,14 @@ void IRAM_ATTR gpio_isr_handler(void* arg)
 void slow_timer_callback(void *priv) // 10 ms
 {
    if(motor_start) motor_handler();
+
+   tim_count++;
+   if(tim_count>50)
+   {
+     rmaker_voltage_update(INA226_get_voltage());
+     rmaker_current_update(INA226_get_current());
+     tim_count=0;
+   }
 }
 
 void fast_timer_callback(void *priv) // 1 ms
