@@ -6,6 +6,7 @@
 #include "backend_if.h"
 #include "rainmaker.h"
 #include "hardware.h"
+#include "enocean.h"
 #include "flash.h"
 #include "motor.h"
 
@@ -14,6 +15,7 @@ void app_main()
     hardware_init();
     flash_init();
     motor_init();
+    enocean_init();
     app_wifi_init();
     rainmaker_init();
 

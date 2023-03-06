@@ -11,7 +11,9 @@
 #include <ws2812_led.h>
 #include "rainmaker.h"
 #include "hardware.h"
+#include "enocean.h"
 #include "INA226.h"
+#include "flash.h"
 #include "motor.h"
 
 esp_timer_handle_t fast_timer; //  1 ms
@@ -28,11 +30,18 @@ void slow_timer_callback(void *priv) // 10 ms
    if(motor_start) motor_handler();
 
    tim_count++;
-   if(tim_count>50)
+   if(tim_count>100)
    {
      rmaker_voltage_update(INA226_get_voltage());
      rmaker_current_update(INA226_get_current());
      tim_count=0;
+   }
+
+   if(gpio_get_level(BUTTON)==0)
+   {
+     enocean_saved_id=enocean_received_id;
+     flash_enocean_write(enocean_received_id);
+     led_blink();
    }
 }
 
@@ -103,8 +112,4 @@ void hardware_init()
     INA226_init();
     INA226_calibrate();
     led_blink();
-
-    // ws2812_led_init();
-    // app_reset_button_register(app_reset_button_create(RESET_BUTTON, RESET_ACTIVE_LEVEL),
-    //                            WIFI_RESET_BUTTON_TIMEOUT, FACTORY_RESET_BUTTON_TIMEOUT);
 }

@@ -95,7 +95,9 @@ void motor_reset(void);
 void set_blind(uint8_t len, uint8_t val);
 uint8_t get_roll(void);
 uint8_t get_angle(void);
-void set_calibrate(void);
+
+void enocean_roll_set(uint8_t cmd);
+void enocean_tilt_set(uint8_t cmd);
 
 extern bool motor_start;
 extern bool motor_feedback;

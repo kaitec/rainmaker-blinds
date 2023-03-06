@@ -5,6 +5,7 @@
 #include <esp_system.h>
 #include "rainmaker.h"
 #include "hardware.h"
+#include "enocean.h"
 #include "flash.h"
 #include "motor.h"
 
@@ -48,9 +49,76 @@ uint8_t get_angle(void)
 	return feedback_angle;
 }
 
-void set_calibrate(void)
+void enocean_roll_set(uint8_t cmd)
 {
+    uint8_t dir=CMD_STOP;
+	if (motor_driver_state(M_DIR_GET) == M_STOPED) dir = cmd;
+	else dir = CMD_STOP;
 
+	switch (dir) 
+    {
+      case CMD_DOWN:
+	  reciv.cmd     = S_IO_CONTROL;
+      reciv.cmd_val = 0; // min roll value
+      reciv.cmd_len = ROLL;
+	  break;
+
+	  case CMD_UP:
+	  reciv.cmd     = S_IO_CONTROL;
+      reciv.cmd_val = 100; // max roll value
+      reciv.cmd_len = ROLL;
+	  break;
+
+	  case CMD_STOP:
+	  motor_driver_state(M_STOPED);
+	  reciv.cmd     = JSON_EMPTY_CMD;
+      reciv.cmd_val = user_motor_var.perc_roll; // current roll value
+	  user_motor_var.set_step    = user_motor_var.current_step;
+      reciv.cmd_len = ROLL;
+	  break;
+    }
+}
+
+void enocean_tilt_set(uint8_t cmd)
+{
+	uint8_t tilt = user_motor_var.angle_t; // Curent tilt (0-12)
+	//ESP_LOGI(__func__, "Curent tilt = %d", tilt);
+
+	uint8_t dir=CMD_STOP;
+	if (motor_driver_state(M_DIR_GET) == M_STOPED) dir = cmd;
+	//else dir = CMD_STOP;
+
+	switch (dir)
+    {
+      case CMD_UP:
+	  if(tilt<=10) 
+	  {
+		tilt+=2;
+	    reciv.cmd     = S_IO_CONTROL;
+        reciv.cmd_val = tilt*DIV_ANGLE;
+        reciv.cmd_len = TILT;
+		//ESP_LOGI(__func__, "Tilt set Up = %d", tilt);
+	  }
+	  break;
+
+	  case CMD_DOWN:
+	  if(tilt>=2) 
+	  {
+		tilt-=2;
+	    reciv.cmd     = S_IO_CONTROL;
+        reciv.cmd_val = tilt*DIV_ANGLE;
+        reciv.cmd_len = TILT;
+		//ESP_LOGI(__func__, "Tilt set Down = %d", tilt);
+	  }
+	  break;
+
+	  case CMD_STOP:
+	//   motor_driver_state(M_STOPED);
+	//   reciv.cmd     = JSON_EMPTY_CMD;
+    //   reciv.cmd_val = tilt*DIV_ANGLE;
+    //   reciv.cmd_len = TILT;
+	  break;
+    }
 }
 
 motor_movement_t motor_driver_state(motor_movement_t state) {
