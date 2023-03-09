@@ -31,6 +31,9 @@ uint32_t getSenderId(uint8_t* data);
 uint8_t calc_header_crc(uint8_t* data);
 uint8_t calc_packet_crc(uint8_t* data);
 
+void run_enocean_connection_task();
+void enocean_connection_task(void *arg);
+
 typedef struct {
         uint8_t       syncByte;
         uint16_t      dataLength;

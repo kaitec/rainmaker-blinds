@@ -155,3 +155,35 @@ uint8_t calc_packet_crc(uint8_t* data)
     }
     return crc;
 }
+
+void run_enocean_connection_task()
+{
+  xTaskCreate(enocean_connection_task, "enocean_connection_task", 1024*2, NULL, configMAX_PRIORITIES, NULL);
+}
+
+void enocean_connection_task(void *arg)
+{
+  enocean_saved_id=0;
+  enocean_received_id=0;
+  uint8_t counter=0;
+
+  while(1)
+  {
+    counter++;
+    gpio_set_level(LED_G, LED_ON); gpio_set_level(LED_R, LED_OFF); 
+    vTaskDelay(500/portTICK_PERIOD_MS);
+    gpio_set_level(LED_G, LED_OFF); gpio_set_level(LED_R, LED_ON); 
+    vTaskDelay(500/portTICK_PERIOD_MS); gpio_set_level(LED_R, LED_OFF); 
+    if(enocean_received_id)
+    {
+      enocean_saved_id=enocean_received_id;
+      led_green_blink();
+      flash_enocean_write(enocean_received_id);
+      vTaskDelete(NULL);
+    }
+    if(counter>10)
+    {
+      vTaskDelete(NULL);
+    }
+  }
+}

@@ -39,9 +39,10 @@ void slow_timer_callback(void *priv) // 10 ms
 
    if(gpio_get_level(BUTTON)==0)
    {
-     enocean_saved_id=enocean_received_id;
-     flash_enocean_write(enocean_received_id);
-     led_blink();
+     run_enocean_connection_task();
+    //  enocean_saved_id=enocean_received_id;
+    //  flash_enocean_write(enocean_received_id);
+    //  led_green_blink();
    }
 }
 
@@ -93,14 +94,14 @@ void gpio_init(void)
     gpio_isr_handler_add(MOTOR_FB, gpio_isr_handler, (void*) MOTOR_FB);
 }
 
-void led_blink(void)
+void led_green_blink(void)
 {
     for(int i=0; i<3; i++)
     {
-        gpio_set_level(LED_G, 0); 
+        gpio_set_level(LED_G, LED_ON); 
         vTaskDelay(100/portTICK_PERIOD_MS);
-        gpio_set_level(LED_G, 1);
-        vTaskDelay(200/portTICK_PERIOD_MS);
+        gpio_set_level(LED_G, LED_OFF);
+        vTaskDelay(100/portTICK_PERIOD_MS);
     }
 }
 
@@ -111,5 +112,5 @@ void hardware_init()
     i2c_init();
     INA226_init();
     INA226_calibrate();
-    led_blink();
+    led_green_blink();
 }

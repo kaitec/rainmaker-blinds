@@ -33,8 +33,9 @@ int32_t CalibratePosition()
     return 0;
 }
 
-int32_t SetEnocean()
+int32_t EnoceanConnection()
 {
+    run_enocean_connection_task();
     return 0;
 }
 

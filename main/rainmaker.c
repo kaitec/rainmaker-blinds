@@ -16,6 +16,7 @@
 #include "esp_rmaker_utils.h"
 #include "hardware.h"
 #include "rainmaker.h"
+#include "enocean.h"
 #include "flash.h"
 #include "motor.h"
 
@@ -42,7 +43,7 @@ esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_param_t *
     {
         ESP_LOGI(__func__, "Mode: %s", val.val.s);
 
-        if (strcmp(val.val.s, "EnConnect") == 0) led_blink();
+        if (strcmp(val.val.s, "EnConnect") == 0) run_enocean_connection_task();
         if (strcmp(val.val.s, "Calibration") == 0) motor_reset();
     } 
     else 

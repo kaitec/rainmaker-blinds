@@ -45,6 +45,9 @@
 #define GPIO_INPUT_PIN_SEL  ((1ULL<<MOTOR_FB) | (1ULL<<BUTTON))
 #endif
 
+#define LED_ON   0
+#define LED_OFF  1
+
 #define DEBUG  NONE
 #define NONE   0
 #define RMAKER 1
@@ -57,7 +60,7 @@
 
 void gpio_init(void);
 void timer_init(void);
-void led_blink(void);
+void led_green_blink(void);
 void hardware_init(void);
 
 #endif /* HARDWARE_H_ */

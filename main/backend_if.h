@@ -10,7 +10,7 @@ int32_t GetAngle(); // get current blinds angle %. Return 0 - fully closed, 90 -
 int32_t SetAngle(uint8_t val); // set current blinds angle %. 0 - fully closed, 90 - fully open (horizontal). Return 0 if ok, <0 for error codes. TODO add error description here
 
 int32_t CalibratePosition(); // calibrate/recalibrate position. Return 0 if ok, <0 for error codes. TODO add error description here
-int32_t SetEnocean(); // added new EnOcean button
+int32_t EnoceanConnection(); // added new EnOcean button
 
 float GetVoltage();// get current voltage in V
 float GetCurrent();// get current current in A
