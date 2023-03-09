@@ -163,7 +163,6 @@ void run_enocean_connection_task()
 
 void enocean_connection_task(void *arg)
 {
-  enocean_saved_id=0;
   enocean_received_id=0;
   uint8_t counter=0;
 

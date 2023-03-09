@@ -40,9 +40,6 @@ void slow_timer_callback(void *priv) // 10 ms
    if(gpio_get_level(BUTTON)==0)
    {
      run_enocean_connection_task();
-    //  enocean_saved_id=enocean_received_id;
-    //  flash_enocean_write(enocean_received_id);
-    //  led_green_blink();
    }
 }
 

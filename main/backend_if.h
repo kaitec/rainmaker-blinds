@@ -3,14 +3,14 @@
 
 #include <stdint.h>
 
-int32_t GetPosition(); // get current blinds position %. Return 0 - fully closed, 100 - fully open.
-int32_t SetPosition(uint8_t val); // set current blinds position %. 0 - fully closed, 100 - fully open. Return 0 if ok, <0 for error codes. TODO add error description here
+uint8_t GetPosition(); // get current blinds position %. Return 0 - fully closed, 100 - fully open.
+uint8_t SetPosition(uint8_t val); // set current blinds position %. 0 - fully closed, 100 - fully open. Return 0 if ok, <0 for error codes. TODO add error description here
 
-int32_t GetAngle(); // get current blinds angle %. Return 0 - fully closed, 90 - fully open (horizontal).
-int32_t SetAngle(uint8_t val); // set current blinds angle %. 0 - fully closed, 90 - fully open (horizontal). Return 0 if ok, <0 for error codes. TODO add error description here
+uint8_t GetAngle(); // get current blinds angle %. Return 0 - fully closed, 90 - fully open (horizontal).
+uint8_t SetAngle(uint8_t val); // set current blinds angle %. 0 - fully closed, 90 - fully open (horizontal). Return 0 if ok, <0 for error codes. TODO add error description here
 
-int32_t CalibratePosition(); // calibrate/recalibrate position. Return 0 if ok, <0 for error codes. TODO add error description here
-int32_t EnoceanConnection(); // added new EnOcean button
+uint8_t CalibratePosition(); // calibrate/recalibrate position. Return 0 if ok, <0 for error codes. TODO add error description here
+uint8_t EnoceanConnection(); // added new EnOcean button
 
 float GetVoltage();// get current voltage in V
 float GetCurrent();// get current current in A

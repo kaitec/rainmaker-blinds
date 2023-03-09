@@ -5,35 +5,35 @@
 #include "flash.h"
 #include "motor.h"
 
-int32_t SetPosition(uint8_t val) // 0-100
+uint8_t SetPosition(uint8_t val) // 0-100
 {
     set_blind(ROLL, val);
     return 0;
 }
 
-int32_t SetAngle(uint8_t val) // 0-180
+uint8_t SetAngle(uint8_t val) // 0-180
 {
     set_blind(TILT, val);
     return 0;
 }
 
-int32_t GetPosition()
+uint8_t GetPosition()
 {
     return get_roll();
 }
 
-int32_t GetAngle()
+uint8_t GetAngle()
 {
     return get_angle();
 }
 
-int32_t CalibratePosition()
+uint8_t CalibratePosition()
 {
     motor_reset();
     return 0;
 }
 
-int32_t EnoceanConnection()
+uint8_t EnoceanConnection()
 {
     run_enocean_connection_task();
     return 0;
