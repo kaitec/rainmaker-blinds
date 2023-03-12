@@ -62,5 +62,6 @@ void gpio_init(void);
 void timer_init(void);
 void led_green_blink(void);
 void hardware_init(void);
+void button_handler(bool state);
 
 #endif /* HARDWARE_H_ */

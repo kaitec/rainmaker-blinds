@@ -18,7 +18,11 @@
 
 esp_timer_handle_t fast_timer; //  1 ms
 esp_timer_handle_t slow_timer; // 10 ms
+
 uint16_t tim_count=0;
+uint16_t btn_count=0;
+uint16_t btn_sum=0;
+bool btn_state=0;
 
 void IRAM_ATTR gpio_isr_handler(void* arg)
 {
@@ -37,15 +41,23 @@ void slow_timer_callback(void *priv) // 10 ms
      tim_count=0;
    }
 
-   if(gpio_get_level(BUTTON)==0)
-   {
-     run_enocean_connection_task();
-   }
+    button_handler(btn_state);
 }
 
 void fast_timer_callback(void *priv) // 1 ms
 {
     timer_function();
+
+    btn_count++;
+    if(gpio_get_level(BUTTON)==0) btn_sum++;
+    if(btn_count>9)
+    {
+       if(btn_sum>5) btn_state=1; 
+       else btn_state=0;
+       btn_count=0;
+       btn_sum=0;
+    }
+
 }
 
 void timer_init(void)
@@ -100,6 +112,39 @@ void led_green_blink(void)
         gpio_set_level(LED_G, LED_OFF);
         vTaskDelay(100/portTICK_PERIOD_MS);
     }
+}
+
+uint16_t bh_count=0;
+void button_handler(bool state) // call 10ms
+{
+   if(bh_count>200 && bh_count<500) // 2-5 second
+   {
+     gpio_set_level(LED_G, LED_ON);
+     if(state==0)
+     {
+        bh_count=0;
+        gpio_set_level(LED_G, LED_OFF);
+        run_enocean_connection_task();
+     }
+   }
+
+   if(bh_count>500 && bh_count<600) gpio_set_level(LED_G, LED_OFF);
+
+   if(bh_count>600 && bh_count<900) // 6-9 second
+   {
+     gpio_set_level(LED_R, LED_ON);
+     if(state==0)
+     {
+        bh_count=0;
+        gpio_set_level(LED_R, LED_OFF);
+        motor_reset();
+     }
+   }
+
+   if(bh_count>900) gpio_set_level(LED_R, LED_OFF);
+
+   if(state) bh_count++;
+   else bh_count=0;
 }
 
 void hardware_init()

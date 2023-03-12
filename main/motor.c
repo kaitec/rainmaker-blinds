@@ -360,15 +360,7 @@ void motor_handler(void) {
 	} State = wait_movement;
 	static uint8_t reState = stop;
 	static uint8_t move_k = 0;
-	//static uint16_t cnt=0;
 	check_alarm();
-
-		 /******* For debug **********/ 
-     // cnt++;
-     // if(cnt>50){
-     // 	 ESP_LOGI(__func__, "State = %d,	b_h.prot = %d,	b_h.move = %d", State, blind_time.b_h.prot, blind_time.b_h.move);
-     // 	 cnt=0;}
-	   /******** END ***************/
 
 	switch (State) {
 		case no_hall_sens:
@@ -389,6 +381,8 @@ void motor_handler(void) {
 
 		case init:
 			if(DEBUG==MOTOR) ESP_LOGI(__func__, "Init direction - DOWN");
+
+			gpio_set_level(LED_R, LED_ON); // Led red on, init start
 
 			if (motor_driver_state(M_DIR_GET) != M_STOPED)
 				motor_driver_state(M_STOPED);
@@ -475,6 +469,8 @@ void motor_handler(void) {
 			if (user_motor_var.max_r_step)// && !blind_time.b_c.telemetry) 
 			{
 				flash_haight_write(user_motor_var.max_r_step);
+				gpio_set_level(LED_R, LED_OFF); // Led red off, init stop
+				led_green_blink();
 				State = wait_movement;
 			}
 			break;
@@ -687,11 +683,9 @@ void load_position(void)
 void reset_movement_variables(void)
 {
 	user_motor_var.max_t_step = MAX_DEF_T_STEPS;
-
 	blind_time.b_h.rest = 0;
 	blind_time.b_h.work = MAX_WORK_TIMEP;
 	position_point = 0;
-
 	control_point = 0;
     reset_point = 0;
 }
@@ -706,6 +700,7 @@ void motor_init(void)
 void motor_reset(void)
 {
 	motor_start=false;
+	led_green_blink();
 	reset_movement_variables();
 	flash_haight_write(0);
     flash_position_write(0);
