@@ -222,7 +222,7 @@ void save_position_per_int(void)
 	}
 }
 
-void timer_function(void)
+void motor_timer_function(void)
 {
      if(feedback_timer_counter < PSEVDO_HALL) 
      {

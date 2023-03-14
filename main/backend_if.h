@@ -14,6 +14,7 @@ uint8_t EnoceanConnection(); // added new EnOcean button
 
 float GetVoltage();// get current voltage in V
 float GetCurrent();// get current current in A
+float GetPower();  // get current power in W
 
 /*
 int32_t GetMotorState(); // 0 if ok, <0 for error.  -1 if overheat etc TODO add error description here

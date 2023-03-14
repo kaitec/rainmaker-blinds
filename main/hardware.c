@@ -16,10 +16,10 @@
 #include "flash.h"
 #include "motor.h"
 
-esp_timer_handle_t fast_timer; //  1 ms
-esp_timer_handle_t slow_timer; // 10 ms
+esp_timer_handle_t fast_timer;   // 1 ms
+esp_timer_handle_t slow_timer;   // 10 ms
+esp_timer_handle_t second_timer; // 1 sec
 
-uint16_t tim_count=0;
 uint16_t btn_count=0;
 uint16_t btn_sum=0;
 bool btn_state=0;
@@ -29,25 +29,22 @@ void IRAM_ATTR gpio_isr_handler(void* arg)
     motor_feedback = gpio_get_level(MOTOR_FB);
 }
 
+void second_timer_callback(void *priv) // 1 sec
+{
+    rmaker_voltage_update(INA226_get_voltage());
+    rmaker_current_update(INA226_get_current());
+}
+
 void slow_timer_callback(void *priv) // 10 ms
 {
-   if(motor_start) motor_handler();
-
-   tim_count++;
-   if(tim_count>100)
-   {
-     rmaker_voltage_update(INA226_get_voltage());
-     rmaker_current_update(INA226_get_current());
-     tim_count=0;
-   }
-
+    if(motor_start) motor_handler();
     button_handler(btn_state);
 }
 
 void fast_timer_callback(void *priv) // 1 ms
 {
-    timer_function();
-
+    motor_timer_function();
+    /* contact bounce protection */
     btn_count++;
     if(gpio_get_level(BUTTON)==0) btn_sum++;
     if(btn_count>9)
@@ -57,11 +54,16 @@ void fast_timer_callback(void *priv) // 1 ms
        btn_count=0;
        btn_sum=0;
     }
-
 }
 
 void timer_init(void)
 {
+    esp_timer_create_args_t second_timer_config = {
+        .callback = second_timer_callback,
+        .dispatch_method = ESP_TIMER_TASK,
+        .name = "second"};
+    esp_timer_create(&second_timer_config, &second_timer);
+
     esp_timer_create_args_t slow_timer_config = {
         .callback = slow_timer_callback,
         .dispatch_method = ESP_TIMER_TASK,
@@ -73,9 +75,10 @@ void timer_init(void)
         .dispatch_method = ESP_TIMER_TASK,
         .name = "fast"};
     esp_timer_create(&fast_timer_config, &fast_timer);
-
-    esp_timer_start_periodic(slow_timer, 10000U); 
-    esp_timer_start_periodic(fast_timer,  1000U); 
+  
+    esp_timer_start_periodic(fast_timer,  1000U);
+    esp_timer_start_periodic(slow_timer,  10000U);  
+    esp_timer_start_periodic(second_timer,1000000U); 
 }
 
 void gpio_init(void)

@@ -48,3 +48,8 @@ float GetCurrent()
 {
     return INA226_get_current();
 }
+
+float GetPower()
+{
+    return INA226_get_power();
+}

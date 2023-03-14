@@ -85,7 +85,7 @@ typedef struct {
 } AVG_MEM_t;
 
 void motor_handler(void);
-void timer_function(void);
+void motor_timer_function(void);
 void motor_HallFb_function(void);
 void reset_movement_variables(void);
 void load_position(void);
