@@ -53,3 +53,13 @@ float GetPower()
 {
     return INA226_get_power();
 }
+
+double GetCurrentIntegratedGeneration()
+{
+    return get_integrated_generation();
+}
+
+void ResetCurrentIntegratedGeneration()
+{
+    reset_integrated_generation();
+}

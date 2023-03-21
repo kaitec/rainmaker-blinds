@@ -31,6 +31,8 @@ void IRAM_ATTR gpio_isr_handler(void* arg)
 
 void second_timer_callback(void *priv) // 1 sec
 {
+    counting_generation();
+
     rmaker_voltage_update(INA226_get_voltage());
     rmaker_current_update(INA226_get_current());
 }

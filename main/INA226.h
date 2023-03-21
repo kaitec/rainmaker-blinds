@@ -102,4 +102,8 @@ float INA226_get_voltage(void);
 float INA226_get_current(void);
 float INA226_get_power(void);
 
+void counting_generation();
+void reset_integrated_generation();
+double get_integrated_generation();
+
 #endif /* INA226_H */

@@ -16,6 +16,9 @@ float GetVoltage();// get current voltage in V
 float GetCurrent();// get current current in A
 float GetPower();  // get current power in W
 
+double GetCurrentIntegratedGeneration();// get generation in ws (watt-second) since last call to ResetCurrentIntegratedGeneration()
+void ResetCurrentIntegratedGeneration();// set current integrated generation to zero
+
 /*
 int32_t GetMotorState(); // 0 if ok, <0 for error.  -1 if overheat etc TODO add error description here
 

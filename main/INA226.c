@@ -158,3 +158,20 @@ float INA226_get_power(void)
 
   return power;
 }
+
+double generation=0;
+
+void counting_generation()
+{
+  generation += INA226_get_power();
+}
+
+void reset_integrated_generation()
+{
+  generation=0;
+}
+
+double get_integrated_generation()
+{
+  return (float)generation;
+}
